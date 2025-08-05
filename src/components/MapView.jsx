@@ -8,6 +8,8 @@ import { MapContainer, TileLayer, GeoJSON } from "react-leaflet";
 import { useEffect, useRef, useState } from "react";
 import FlyToBounds from "./FlyToBounds";
 import { basemaps } from "./BaseMapSelector";
+import './../assets/styles/MapView.css';
+
 
 const MapView = ({ showGIBS, selectedDate, colorStyle, boundingBox, geojson, selectedBasemap }) => {
     const [showOverlay, setShowOverlay] = useState(false);
@@ -116,37 +118,11 @@ const MapView = ({ showGIBS, selectedDate, colorStyle, boundingBox, geojson, sel
 
             {/* No data banner */}
             {showGIBS && noData && bannerVisible && (
-                <div
-                    style={{
-                        position: "absolute",
-                        top: 12,
-                        left: "50%",
-                        transform: "translateX(-50%)",
-                        background: "rgba(255,255,255,0.95)",
-                        padding: "8px 14px",
-                        borderRadius: 6,
-                        color: "#b00",
-                        fontWeight: 600,
-                        zIndex: 1200,
-                        boxShadow: "0 2px 6px rgba(0,0,0,0.15)",
-                    }}
-                >
-                    No data available for {selectedDate}&nbsp;&nbsp;&nbsp;
+                <div className="no-data-banner">
+                    No data available for {selectedDate} &nbsp;&nbsp;&nbsp;
                     <button
                         onClick={() => setBannerVisible(false)}
-                        aria-label="Close no data banner"
-                        style={{
-                            cursor: "pointer",
-                            border: "none",
-                            background: "transparent",
-                            fontWeight: "bold",
-                            fontSize: "1.2em",
-                            lineHeight: 1,
-                            color: "black",
-                            padding: 0,
-                            margin: 0,
-                        }}
-                    >
+                        aria-label="Close no data banner">
                         &times;
                     </button>
                 </div>

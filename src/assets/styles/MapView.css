@@ -1,0 +1,29 @@
+.no-data-banner {
+    position: absolute;
+    top: 12px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(255, 255, 255, 0.95);
+    padding: 8px 14px;
+    border-radius: 6px;
+    color: #b00;
+    font-weight: 600;
+    z-index: 1200;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    max-width: 320px;
+}
+
+.no-data-banner button {
+    cursor: pointer;
+    border: none;
+    background: transparent;
+    font-weight: bold;
+    font-size: 1.2em;
+    line-height: 1;
+    color: #b00;
+    padding: 0;
+    margin: 0;
+}
