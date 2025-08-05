@@ -1,17 +1,25 @@
 /**
  * MapView.jsx
  * Main Leaflet map component for GIBS Visualization
- * Displays NASA's OPERA_L3_Dynamic_Surface_Water_Extent-HLS layer on basemap.
+ * Displays NASA's HLS_S30_Nadir_BRDF_Adjusted_Reflectance layer on basemap.
  * Shows a banner message when no overlay data is available for the selected date.
  */
 import { MapContainer, TileLayer, GeoJSON } from "react-leaflet";
 import { useEffect, useRef, useState } from "react";
 import FlyToBounds from "./FlyToBounds";
 import { basemaps } from "./BaseMapSelector";
-import './../assets/styles/MapView.css';
+import "./../assets/styles/MapView.css";
 
 
-const MapView = ({ showGIBS, selectedDate, colorStyle, boundingBox, geojson, selectedBasemap }) => {
+const MapView = ({
+                     showGIBS,
+                     selectedDate,
+                     colorStyle,
+                     boundingBox,
+                     geojson,
+                     selectedBasemap,
+    gibsLayer
+                 }) => {
     const [showOverlay, setShowOverlay] = useState(false);
     const [noData, setNoData] = useState(false);
     const [bannerVisible, setBannerVisible] = useState(false);
@@ -23,9 +31,27 @@ const MapView = ({ showGIBS, selectedDate, colorStyle, boundingBox, geojson, sel
         started: false,
     });
 
-    const basemap = basemaps.find((b) => b.id === selectedBasemap) || basemaps[0];
+    const basemap =
+        basemaps.find((b) => b.id === selectedBasemap) || basemaps[0];
 
-    // check if tile image is empty
+    // CSS filters for color styles
+    const filterMap = {
+        normal: "none",
+        grayscale: "grayscale(100%)",
+        inverted: "invert(100%)",
+        falsecolor: "hue-rotate(200deg) saturate(2) brightness(1.1)",
+        sepia: "sepia(60%) saturate(2)",
+    };
+
+    // Apply CSS filter on each tile image
+    const applyColorFilter = (event) => {
+        const tileImg = event.tile;
+        if (tileImg && tileImg.style) {
+            tileImg.style.filter = filterMap[colorStyle] || "none";
+        }
+    };
+
+    // Check if tile image is empty (transparent)
     const isTileTransparent = (img) => {
         try {
             const w = img.naturalWidth || img.width;
@@ -77,11 +103,15 @@ const MapView = ({ showGIBS, selectedDate, colorStyle, boundingBox, geojson, sel
     };
 
     // Map overlay URL
-    const gibsUrl = `https://gibs.earthdata.nasa.gov/wmts/epsg4326/best/OPERA_L3_Dynamic_Surface_Water_Extent-HLS/default/${selectedDate}/31.25m/{z}/{y}/{x}.png`;
+    const gibsUrl = gibsLayer.urlTemplate.replace("{date}", selectedDate);
 
     return (
         <div style={{ height: "100%", width: "100%", position: "relative" }}>
-            <MapContainer center={[25, 0]} zoom={2.5} style={{ height: "100%", width: "100%" }}>
+            <MapContainer
+                center={[25, 0]}
+                zoom={2.5}
+                style={{ height: "100%", width: "100%" }}
+            >
                 {/* Basemap - no event handlers */}
                 <TileLayer url={basemap.url} attribution={basemap.attribution} />
 
@@ -100,6 +130,9 @@ const MapView = ({ showGIBS, selectedDate, colorStyle, boundingBox, geojson, sel
                             tileload: (e) => {
                                 countersRef.current.loaded += 1;
                                 if (isTileTransparent(e.tile)) countersRef.current.empty += 1;
+
+                                // APPLY COLOR FILTER ON TILE LOAD
+                                applyColorFilter(e);
                             },
                             tileerror: () => {
                                 countersRef.current.loaded += 1;
@@ -112,7 +145,11 @@ const MapView = ({ showGIBS, selectedDate, colorStyle, boundingBox, geojson, sel
 
                 {boundingBox && <FlyToBounds bounds={boundingBox} />}
                 {showOverlay && geojson && (
-                    <GeoJSON key={JSON.stringify(geojson)} data={geojson} style={{ color: "red", weight: 2, fillOpacity: 0.3 }} />
+                    <GeoJSON
+                        key={JSON.stringify(geojson)}
+                        data={geojson}
+                        style={{ color: "red", weight: 2, fillOpacity: 0.3 }}
+                    />
                 )}
             </MapContainer>
 
@@ -122,7 +159,8 @@ const MapView = ({ showGIBS, selectedDate, colorStyle, boundingBox, geojson, sel
                     No data available for {selectedDate} &nbsp;&nbsp;&nbsp;
                     <button
                         onClick={() => setBannerVisible(false)}
-                        aria-label="Close no data banner">
+                        aria-label="Close no data banner"
+                    >
                         &times;
                     </button>
                 </div>

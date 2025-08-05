@@ -34,7 +34,7 @@ const FloatingPanel = ({
                         id="gibsCheck"
                     />
                     <label className="form-check-label" htmlFor="gibsCheck">
-                        OPERA Surface Water - HLS
+                        HLS S30 Adjusted Reflectance
                     </label>
                 </div>
 

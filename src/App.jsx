@@ -15,6 +15,7 @@ import MapView from './components/MapView';
 import FloatingPanel from './components/FloatingPanel';
 import {useState} from 'react';
 import './index.css';
+import { gibsLayers } from "./config/gibsLayers";
 
 function App() {
     const [events] = useState([]);
@@ -22,13 +23,16 @@ function App() {
     const [showGIBS, setShowGIBS] = useState(true);
     const [selectedDate, setSelectedDate] = useState('2023-07-30'); // default GIBS date
     const [colorStyle, setColorStyle] = useState('normal');
-    const [selectedBasemap, setSelectedBasemap] = useState('esri');
+    const [selectedBasemap, setSelectedBasemap] = useState('osm');
     const [isOpen, setIsOpen] = useState(true);
+    const [selectedLayerId, setSelectedLayerId] = useState("HLS_S30");
 
     const handleEventSelect = (event) => {
         if (!event) return;
         setSelectedEvent(event);
     };
+    const selectedLayer = gibsLayers.find(layer => layer.id === selectedLayerId);
+
 
     return (
         <div className="app">
@@ -43,7 +47,9 @@ function App() {
                     selectedDate={selectedDate}
                     colorStyle={colorStyle}
                     selectedEvent={selectedEvent}
-                    selectedBasemap={selectedBasemap}/>
+                    selectedBasemap={selectedBasemap}
+                    gibsLayer={selectedLayer}
+                    selectedLayerId={selectedLayerId}/>
                 <FloatingPanel
                     showGIBS={showGIBS}
                     setShowGIBS={setShowGIBS}
