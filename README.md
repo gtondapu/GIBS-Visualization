@@ -60,11 +60,24 @@ No data available for {selectedDate}
 - This banner can be dismissed by clicking the close button
 
 ## Project Structure
-
-- `src/` — Main source code including React components and styles
-- `components/` — Reusable React components like Map, Controls, and Selectors
-- `data/` — JSON files containing event data for the Event Selector
-- `public/` — Static assets such as icons and favicon
+```
+GIBS-Visualization/
+├── public/ # Static files (preloaded_events.json)
+├── src/
+│ ├── assets/ # CSS styles, images, and other static assets
+│ ├── components/ # React components
+│ │ ├── BaseMapSelector.jsx
+│ │ ├── EventSelector.jsx
+│ │ ├── FloatingPanel.jsx
+│ │ ├── FlyToBounds.jsx
+│ │ └── MapView.jsx
+│ ├── config/ # Configuration files (e.g., gibsLayers.js)
+│ ├── App.jsx # Main app component
+│ └── index.jsx # React app entry point
+├── .gitignore # Git ignore rules
+├── package.json # NPM dependencies and scripts
+└── README.md # Project documentation
+```
 
 ## Dependencies
 
