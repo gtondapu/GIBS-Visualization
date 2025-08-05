@@ -15,18 +15,14 @@
 ## Installation
 
 1. Clone the repository:
-   ```bash
-   git clone https://github.com/gtondapu/GIBS-Visualization.git
-   cd GIBS-Visualization
+   `git clone https://github.com/gtondapu/GIBS-Visualization.git`
+   `cd GIBS-Visualization`
 2. Install dependencies:
-   ```bash
-  npm install
+    `npm install`
 3. Start the development server:
-  ```bash
-  npm run dev
+    `npm run dev`
 4. Open your browser and go to:
-    ```bash
-    http://localhost:3000 (3000 or any port your terminal mentions)
+    `http://localhost:3000` (3000 or any port your terminal mentions)
 
 ## Usage
 
