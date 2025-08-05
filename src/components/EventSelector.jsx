@@ -1,23 +1,41 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import Select from 'react-select';
 
-const EventSelector = ({ events, onSelect, selectedEvent }) => {
-    const options = events.map(e => ({
-        value: e.id,
-        label: e.name,
-        coordinates: [e.latitude, e.longitude],
+const EventSelector = ({ onSelect }) => {
+    const [events, setEvents] = useState([]);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        fetch('/preloaded_events.json')
+            .then((res) => res.json())
+            .then((data) => {
+                setEvents(data);
+                setLoading(false);
+            })
+            .catch((err) => {
+                console.error('Failed to load events:', err);
+                setLoading(false);
+            });
+    }, []);
+
+    const options = events.map((event, index) => ({
+        value: index,
+        label: `${event.event_name} (${event.date})`,
+        data: event,
     }));
 
     const handleChange = (selectedOption) => {
-        onSelect(selectedOption);
+        if (selectedOption) {
+            onSelect(selectedOption.data);
+        }
     };
 
     return (
         <Select
             options={options}
+            isLoading={loading}
+            placeholder="Search and select an event..."
             onChange={handleChange}
-            value={selectedEvent}
-            placeholder="Select or search event..."
             isClearable
         />
     );

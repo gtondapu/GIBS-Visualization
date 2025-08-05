@@ -1,10 +1,10 @@
 import './../FloatingPanel.css';
 import EventSelector from './../components/EventSelector';
-
+import BasemapSelector from './../components/BasemapSelector';
 const FloatingPanel = ({ showGIBS, setShowGIBS, selectedDate, setSelectedDate,  colorStyle,
-                           setColorStyle,events, selectedEvent, setSelectedEvent,loading,error }) => (
+                           setColorStyle,events, selectedEvent, handleEventSelect,loading,error,selectedBasemap,setSelectedBasemap }) => (
     <div className="floating-panel card shadow-sm p-3 position-absolute">
-        <h6>Overlays</h6>
+        <h6>Map Controls</h6>
         <div className="form-check">
             <input
                 className="form-check-input"
@@ -13,9 +13,13 @@ const FloatingPanel = ({ showGIBS, setShowGIBS, selectedDate, setSelectedDate,  
                 onChange={(e) => setShowGIBS(e.target.checked)}
                 id="gibsCheck"
             />
+
             <label className="form-check-label" htmlFor="gibsCheck">
-                NASA GIBS Water
+                OPERA Surface Water - HLS
             </label>
+        </div>
+        <div style={{ flex: 1 }} >
+            <BasemapSelector current={selectedBasemap} onChange={setSelectedBasemap} />
         </div>
         <div className="mb-2">
             <label htmlFor="datePicker" className="form-label">Select Date</label>
@@ -44,14 +48,19 @@ const FloatingPanel = ({ showGIBS, setShowGIBS, selectedDate, setSelectedDate,  
                 <option value="sepia">Sepia</option>
             </select>
         </div>
-        {loading && <p>Loading events...</p>}
-        {error && <p>Error loading events: {error.message}</p>}
-        {!loading && !error && (
-            <EventSelector
-                events={events}
-                onSelect={setSelectedEvent}
-                selectedEvent={selectedEvent}
-            />
+        <EventSelector onSelect={handleEventSelect} />
+
+        {selectedEvent && (
+            <>
+                <p>
+                    <strong>{selectedEvent.event_name}</strong> ({selectedEvent.date})
+                </p>
+                <img
+                    src={selectedEvent.thumbnail}
+                    alt="Event Thumbnail"
+                    style={{ maxWidth: '300px', marginBottom: '10px' }}
+                />
+            </>
         )}
     </div>
 );

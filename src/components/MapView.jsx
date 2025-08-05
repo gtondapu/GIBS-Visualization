@@ -1,19 +1,10 @@
-import { MapContainer, TileLayer,Marker, useMap } from 'react-leaflet';
+import { MapContainer, TileLayer,GeoJSON, useMap } from 'react-leaflet';
 import { useGIBSOverlay } from '../hooks/useGIBSOverlay';
 import { useEffect, useState } from 'react';
+import FlyToBounds from './FlyToBounds';
+import { basemaps } from './BaseMapSelector';
 
-const MapPanTo = ({ position }) => {
-    const map = useMap();
-
-    useEffect(() => {
-        if (position) {
-            map.setView(position, 10, { animate: true });
-        }
-    }, [position, map]);
-
-    return null;
-};
-const MapView = ({ showGIBS, selectedDate, colorStyle, selectedEvent }) => {
+const MapView = ({ showGIBS, selectedDate, colorStyle, selectedEvent,boundingBox, geojson, selectedBasemap  }) => {
     const defaultPosition = [20, 0]; // default center
     const eventPosition = selectedEvent ? selectedEvent.coordinates : null;
     const gibs = useGIBSOverlay({ enabled: showGIBS, date: selectedDate  });
@@ -24,6 +15,8 @@ const MapView = ({ showGIBS, selectedDate, colorStyle, selectedEvent }) => {
         falsecolor: 'hue-rotate(200deg) saturate(2) brightness(1.1)',
         sepia: 'sepia(60%) saturate(2)',
     };
+    const [showOverlay, setShowOverlay] = useState(false);
+    const basemap = basemaps.find((b) => b.id === selectedBasemap) || basemaps[0];
 
     const applyColorFilter = (event) => {
         console.log('Applying filter', colorStyle);
@@ -32,13 +25,22 @@ const MapView = ({ showGIBS, selectedDate, colorStyle, selectedEvent }) => {
             tileImg.style.filter = filterMap[colorStyle] || 'none';
         }
     };
+    useEffect(() => {
+        if (boundingBox && geojson) {
+            // Delay showing the GeoJSON to allow base tiles to render
+            setShowOverlay(false);
+            const timer = setTimeout(() => {
+                setShowOverlay(true);
+            }, 800); // 800ms seems to work well
+
+            return () => clearTimeout(timer);
+        }
+    }, [boundingBox, geojson]);
 
     return (
         <MapContainer center={[20, 0]} zoom={2} style={{ height: '100%', width: '100%' }}>
-            <TileLayer
-                url="https://tile.openstreetmap.org/{z}/{x}/{y}.png"
-                attribution="&copy; OpenStreetMap contributors"
-            />
+            <TileLayer url={basemap.url} attribution={basemap.attribution} />
+
             {showGIBS && (
                 <TileLayer
                     key={colorStyle} // force remount on style change
@@ -50,8 +52,9 @@ const MapView = ({ showGIBS, selectedDate, colorStyle, selectedEvent }) => {
                     }}
                 />
             )}
-            {eventPosition && <Marker position={eventPosition} />}
-            <MapPanTo position={eventPosition} />
+            {boundingBox && <FlyToBounds bounds={boundingBox} />}
+            {showOverlay && geojson && <GeoJSON key={JSON.stringify(geojson)} data={geojson} style={{ color: 'red', weight: 2, fillOpacity: 0.3  }} />}
+
         </MapContainer>
     );
 };
