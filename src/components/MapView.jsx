@@ -1,61 +1,157 @@
-import { MapContainer, TileLayer,GeoJSON, useMap } from 'react-leaflet';
-import { useGIBSOverlay } from '../hooks/useGIBSOverlay';
-import { useEffect, useState } from 'react';
-import FlyToBounds from './FlyToBounds';
-import { basemaps } from './BaseMapSelector';
+/**
+ * MapView.jsx
+ * Main Leaflet map component for GIBS Visualization
+ * Displays NASA's OPERA_L3_Dynamic_Surface_Water_Extent-HLS layer on basemap.
+ * Shows a banner message when no overlay data is available for the selected date.
+ */
+import { MapContainer, TileLayer, GeoJSON } from "react-leaflet";
+import { useEffect, useRef, useState } from "react";
+import FlyToBounds from "./FlyToBounds";
+import { basemaps } from "./BaseMapSelector";
 
-const MapView = ({ showGIBS, selectedDate, colorStyle, selectedEvent,boundingBox, geojson, selectedBasemap  }) => {
-    const defaultPosition = [20, 0]; // default center
-    const eventPosition = selectedEvent ? selectedEvent.coordinates : null;
-    const gibs = useGIBSOverlay({ enabled: showGIBS, date: selectedDate  });
-    const filterMap = {
-        normal: 'none',
-        grayscale: 'grayscale(100%)',
-        inverted: 'invert(100%)',
-        falsecolor: 'hue-rotate(200deg) saturate(2) brightness(1.1)',
-        sepia: 'sepia(60%) saturate(2)',
-    };
+const MapView = ({ showGIBS, selectedDate, colorStyle, boundingBox, geojson, selectedBasemap }) => {
     const [showOverlay, setShowOverlay] = useState(false);
+    const [noData, setNoData] = useState(false);
+    const [bannerVisible, setBannerVisible] = useState(false);
+
+    const countersRef = useRef({
+        total: 0,
+        loaded: 0,
+        empty: 0,
+        started: false,
+    });
+
     const basemap = basemaps.find((b) => b.id === selectedBasemap) || basemaps[0];
 
-    const applyColorFilter = (event) => {
-        console.log('Applying filter', colorStyle);
-        const tileImg = event.tile; // This is the <img> element of the tile
-        if (tileImg && tileImg.style) {
-            tileImg.style.filter = filterMap[colorStyle] || 'none';
+    // check if tile image is empty
+    const isTileTransparent = (img) => {
+        try {
+            const w = img.naturalWidth || img.width;
+            const h = img.naturalHeight || img.height;
+            if (!w || !h) return false;
+            const canvas = document.createElement("canvas");
+            canvas.width = w;
+            canvas.height = h;
+            const ctx = canvas.getContext("2d");
+            ctx.drawImage(img, 0, 0, w, h);
+            const pixels = ctx.getImageData(0, 0, w, h).data;
+            const step = 10; // sample pixels
+            for (let i = 3; i < pixels.length; i += 4 * step) {
+                if (pixels[i] > 0) return false;
+            }
+            return true;
+        } catch {
+            return false; // if CORS or error, assume not empty to avoid false no-data
         }
     };
+
+    // Reset counters on overlay toggle or date change
+    useEffect(() => {
+        countersRef.current = { total: 0, loaded: 0, empty: 0, started: false };
+        setNoData(false);
+        setBannerVisible(false);
+    }, [selectedDate, showGIBS]);
+
+    // Delay GeoJSON rendering for smoothness
     useEffect(() => {
         if (boundingBox && geojson) {
-            // Delay showing the GeoJSON to allow base tiles to render
             setShowOverlay(false);
-            const timer = setTimeout(() => {
-                setShowOverlay(true);
-            }, 800); // 800ms seems to work well
-
-            return () => clearTimeout(timer);
+            const t = setTimeout(() => setShowOverlay(true), 800);
+            return () => clearTimeout(t);
         }
     }, [boundingBox, geojson]);
 
+    // Decide no data once all tiles loaded/errored
+    const evaluateNoData = () => {
+        const c = countersRef.current;
+        if (!showGIBS || !c.started) return; // only if overlay active & tiles requested
+        if (c.total > 0 && c.loaded === c.total && c.empty === c.total) {
+            setNoData(true);
+            setBannerVisible(true);
+        } else {
+            setNoData(false);
+            setBannerVisible(false);
+        }
+    };
+
+    // Map overlay URL
+    const gibsUrl = `https://gibs.earthdata.nasa.gov/wmts/epsg4326/best/OPERA_L3_Dynamic_Surface_Water_Extent-HLS/default/${selectedDate}/31.25m/{z}/{y}/{x}.png`;
+
     return (
-        <MapContainer center={[20, 0]} zoom={2} style={{ height: '100%', width: '100%' }}>
-            <TileLayer url={basemap.url} attribution={basemap.attribution} />
+        <div style={{ height: "100%", width: "100%", position: "relative" }}>
+            <MapContainer center={[25, 0]} zoom={2.5} style={{ height: "100%", width: "100%" }}>
+                {/* Basemap - no event handlers */}
+                <TileLayer url={basemap.url} attribution={basemap.attribution} />
 
-            {showGIBS && (
-                <TileLayer
-                    key={colorStyle} // force remount on style change
-                    url={`https://gibs.earthdata.nasa.gov/wmts/epsg4326/best/OPERA_L3_Dynamic_Surface_Water_Extent-HLS/default/${selectedDate}/31.25m/{z}/{y}/{x}.png`}
-                    maxZoom={12}
-                    opacity={0.6}
-                    eventHandlers={{
-                        tileload: applyColorFilter,
+                {/* Overlay */}
+                {showGIBS && (
+                    <TileLayer
+                        key={`${selectedDate}-${colorStyle}`}
+                        url={gibsUrl}
+                        maxZoom={12}
+                        opacity={0.6}
+                        eventHandlers={{
+                            tileloadstart: () => {
+                                countersRef.current.started = true;
+                                countersRef.current.total += 1;
+                            },
+                            tileload: (e) => {
+                                countersRef.current.loaded += 1;
+                                if (isTileTransparent(e.tile)) countersRef.current.empty += 1;
+                            },
+                            tileerror: () => {
+                                countersRef.current.loaded += 1;
+                                countersRef.current.empty += 1;
+                            },
+                            load: evaluateNoData,
+                        }}
+                    />
+                )}
+
+                {boundingBox && <FlyToBounds bounds={boundingBox} />}
+                {showOverlay && geojson && (
+                    <GeoJSON key={JSON.stringify(geojson)} data={geojson} style={{ color: "red", weight: 2, fillOpacity: 0.3 }} />
+                )}
+            </MapContainer>
+
+            {/* No data banner */}
+            {showGIBS && noData && bannerVisible && (
+                <div
+                    style={{
+                        position: "absolute",
+                        top: 12,
+                        left: "50%",
+                        transform: "translateX(-50%)",
+                        background: "rgba(255,255,255,0.95)",
+                        padding: "8px 14px",
+                        borderRadius: 6,
+                        color: "#b00",
+                        fontWeight: 600,
+                        zIndex: 1200,
+                        boxShadow: "0 2px 6px rgba(0,0,0,0.15)",
                     }}
-                />
+                >
+                    No data available for {selectedDate}&nbsp;&nbsp;&nbsp;
+                    <button
+                        onClick={() => setBannerVisible(false)}
+                        aria-label="Close no data banner"
+                        style={{
+                            cursor: "pointer",
+                            border: "none",
+                            background: "transparent",
+                            fontWeight: "bold",
+                            fontSize: "1.2em",
+                            lineHeight: 1,
+                            color: "black",
+                            padding: 0,
+                            margin: 0,
+                        }}
+                    >
+                        &times;
+                    </button>
+                </div>
             )}
-            {boundingBox && <FlyToBounds bounds={boundingBox} />}
-            {showOverlay && geojson && <GeoJSON key={JSON.stringify(geojson)} data={geojson} style={{ color: 'red', weight: 2, fillOpacity: 0.3  }} />}
-
-        </MapContainer>
+        </div>
     );
 };
 

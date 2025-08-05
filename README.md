@@ -1,6 +1,6 @@
 # GIBS-Visualization
 
-**GIBS-Visualization** is a React-based web app that visualizes NASA’s GIBS layers on a Leaflet map. It displays the **OPERA_L3_Dynamic_Surface_Water_Extent-HLS** dynamic surface water extent layer, with interactive controls to customize the view.
+**GIBS-Visualization** is a React-based web app that visualizes NASA’s GIBS layers on a Leaflet map. It displays the **OPERA_L3_Dynamic_Surface_Water_Extent-HLS** layer, with interactive controls to customize the view.
 
 ## Features
 

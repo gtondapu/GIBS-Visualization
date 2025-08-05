@@ -1,7 +1,14 @@
-import { useMap } from 'react-leaflet';
-import { useEffect } from 'react';
+/**
+ * FlyToBounds.jsx
+ *
+ * When user selects an event from the dropdown, this component adjusts the Leaflet map's view so that all of the specified bounds
+ * are visible (fly animation)
+ *
+ */
+import {useMap} from 'react-leaflet';
+import {useEffect} from 'react';
 
-const FlyToBounds = ({ bounds }) => {
+const FlyToBounds = ({bounds}) => {
     const map = useMap();
 
     useEffect(() => {
