@@ -1,12 +1,80 @@
-# React + Vite
+GIBS-Visualization
+GIBS-Visualization is a React-based web app that visualizes NASA’s GIBS layers on a Leaflet map. It displays the OPERA_L3_Dynamic_Surface_Water_Extent-HLS dynamic surface water extent layer, with interactive controls to customize the view.
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Features
+Layer Toggle: Turn the OPERA surface water extent layer on/off
 
-Currently, two official plugins are available:
+Date Picker: Select a date to load the layer for that specific day
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+Basemap Selector: Choose from multiple basemaps for the map background
 
-## Expanding the ESLint configuration
+Event Selector: Select and highlight events loaded from a JSON data source
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+Layer Style Selector: Change the styling of the active layer dynamically
+
+Interactive map with zoom and pan using Leaflet
+
+Responsive UI with React and Bootstrap
+
+Installation
+Clone the repository:
+
+bash
+Copy
+Edit
+git clone https://github.com/gtondapu/GIBS-Visualization.git
+cd GIBS-Visualization
+Install dependencies:
+
+bash
+Copy
+Edit
+npm install
+Start the development server:
+
+bash
+Copy
+Edit
+npm run deve
+Open your browser and go to:
+
+arduino
+Copy
+Edit
+http://localhost:3000
+Usage
+Use the Layer Toggle to show or hide the OPERA_L3_Dynamic_Surface_Water_Extent-HLS layer.
+
+Pick a date via the Date Picker to load the imagery corresponding to that date.
+
+Change the basemap using the Basemap Selector dropdown.
+
+Select an event from the Event Selector to focus on specific geographic or temporal data.
+
+Adjust the layer’s appearance through the Layer Style Selector.
+
+Project Structure
+src/ — Main source code including React components and styles
+
+components/ — Reusable React components like Map, Controls, and Selectors
+
+data/ — JSON files containing event data for the Event Selector
+
+public/ — Static assets such as icons and favicon
+
+Dependencies
+React
+
+Leaflet & react-leaflet
+
+Bootstrap (CSS framework)
+
+Date picker component (if you use a library like react-datepicker or similar)
+
+Contributing
+Contributions, issues, and feature requests are welcome! Feel free to fork and submit pull requests.
+
+License
+(Include your license here, e.g., MIT License)
+
+Would you like me to generate this as a markdown file you can add directly to your repo? Or any more features/details you want included?
