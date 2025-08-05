@@ -15,7 +15,8 @@
 ## Installation
 
 1. Clone the repository:
-   `git clone https://github.com/gtondapu/GIBS-Visualization.git`␣␣ 
+   `git clone https://github.com/gtondapu/GIBS-Visualization.git`
+2. Enter the cloned directory:
    `cd GIBS-Visualization`
 3. Install dependencies:
     `npm install`
