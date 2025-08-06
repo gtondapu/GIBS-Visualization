@@ -122,6 +122,7 @@ const MapView = ({
                         url={gibsUrl}
                         maxZoom={12}
                         opacity={0.6}
+
                         eventHandlers={{
                             tileloadstart: () => {
                                 countersRef.current.started = true;
